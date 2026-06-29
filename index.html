@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barrows Connected Store — RFP Deck Generator</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0A0A14;color:#fff;min-height:100vh}
+.hdr{background:#0A0A14;border-bottom:1px solid rgba(255,255,255,0.08);padding:0 2rem;position:sticky;top:0;z-index:100}
+.hdr-in{max-width:900px;margin:0 auto;height:56px;display:flex;align-items:center;gap:12px}
+.wm-dot{width:28px;height:28px;background:#007C85;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#4ECDC4;flex-shrink:0}
+.wm-name{font-size:12px;font-weight:600;color:#fff;letter-spacing:.06em;text-transform:uppercase}
+.wm-sub{font-size:11px;color:rgba(255,255,255,0.3)}
+.prog-wrap{background:#0C0C18;border-bottom:1px solid rgba(255,255,255,0.05);padding:0 2rem}
+.prog-in{max-width:900px;margin:0 auto;padding:10px 0 8px}
+.prog-bar{height:2px;background:rgba(255,255,255,0.06);border-radius:2px;margin-bottom:8px}
+.prog-fill{height:2px;background:linear-gradient(90deg,#007C85,#4ECDC4);border-radius:2px;transition:width .4s ease}
+.prog-steps{display:flex}
+.prog-step{flex:1;font-size:10px;color:rgba(255,255,255,0.2);text-align:center;letter-spacing:.04em}
+.prog-step.done{color:rgba(255,255,255,0.35)}.prog-step.act{color:#4ECDC4;font-weight:600}
+.shell{max-width:900px;margin:0 auto;padding:2rem 2rem 6rem}
+.step{display:none}.step.active{display:block}
+.eyebrow{font-size:10px;font-weight:600;color:#007C85;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;background:#4ECDC4;display:inline-block;padding:2px 8px;border-radius:3px}
+.htitle{font-size:26px;font-weight:700;color:#fff;margin-bottom:6px;margin-top:10px}
+.hsub{font-size:14px;color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:1.75rem}
+.card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:1.25rem;margin-bottom:12px}
+.fl{margin-bottom:22px}.fl:last-child{margin-bottom:0}
+.flbl{font-size:12px;font-weight:600;color:#fff;margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em}
+.fhint{font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:8px;line-height:1.5}
+input[type=text]{width:100%;padding:10px 13px;font-size:14px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:rgba(255,255,255,0.05);color:#fff;outline:none;font-family:inherit;transition:border .15s}
+input[type=text]::placeholder{color:rgba(255,255,255,0.2)}
+input[type=text]:focus{border-color:#007C85;box-shadow:0 0 0 3px rgba(3,70,47,0.2)}
+.pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:5px}
+.pill{padding:6px 13px;border:1px solid rgba(255,255,255,0.1);border-radius:20px;font-size:12px;color:rgba(255,255,255,0.5);cursor:pointer;background:transparent;transition:all .12s;user-select:none}
+.pill:hover{border-color:rgba(78,205,196,0.4);color:#4ECDC4;background:rgba(78,205,196,0.06)}
+.pill.on{background:#007C85;border-color:#007C85;color:#4ECDC4;font-weight:600}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.75rem}
+.btn{padding:9px 18px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:transparent;color:rgba(255,255,255,0.55);font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .12s;font-family:inherit}
+.btn:hover{background:rgba(255,255,255,0.06);color:#fff}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btnp{background:#007C85;border-color:#007C85;color:#4ECDC4}.btnp:hover:not(:disabled){background:#005f66}
+.sec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-top:6px}
+.sec-card{border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 12px;cursor:pointer;transition:all .14s;position:relative}
+.sec-card:hover{border-color:rgba(78,205,196,0.3);background:rgba(78,205,196,0.04)}
+.sec-card.on{border-color:#007C85;background:rgba(0,124,133,0.12)}
+.sec-card-name{font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);margin-bottom:3px}
+.sec-card-layout{font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:8px}
+.sec-card.on .sec-card-name{color:#4ECDC4}
+.preview-wire{width:100%;height:52px;border-radius:4px;overflow:hidden;position:relative;background:rgba(255,255,255,0.04)}
+.check{position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:10px}
+.sec-card.on .check{background:#4ECDC4;border-color:#4ECDC4;color:#007C85}
+.structure-card{border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .14s;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.structure-card:hover{border-color:rgba(78,205,196,0.3)}
+.structure-card.on{border-color:#007C85;background:rgba(0,124,133,0.1)}
+.sc-radio{width:16px;height:16px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.2);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .14s}
+.structure-card.on .sc-radio{border-color:#4ECDC4;background:#4ECDC4}
+.sc-dot{width:7px;height:7px;border-radius:50%;background:#007C85;display:none}
+.structure-card.on .sc-dot{display:block}
+.sc-title{font-size:13px;font-weight:600;color:#fff;margin-bottom:2px}
+.sc-desc{font-size:12px;color:rgba(255,255,255,0.38);line-height:1.5}
+.sc-count{font-size:11px;color:#4ECDC4;margin-top:3px}
+.config-display{padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);font-size:11px;color:rgba(255,255,255,0.45);margin-top:1rem;white-space:pre}
+.info-box{padding:12px 14px;border-radius:8px;background:rgba(78,205,196,0.07);border:1px solid rgba(78,205,196,0.15);font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:14px}
+.info-box strong{color:#4ECDC4}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-in">
+    <div class="wm-dot">B</div>
+    <div>
+      <div class="wm-name">Barrows Connected Store</div>
+      <div class="wm-sub">Module 5 — RFP Deck Generator</div>
+    </div>
+  </div>
+</div>
+
+<div class="prog-wrap">
+  <div class="prog-in">
+    <div class="prog-bar"><div class="prog-fill" id="prog" style="width:25%"></div></div>
+    <div class="prog-steps">
+      <div class="prog-step act" id="ps1">1. Retailer</div>
+      <div class="prog-step" id="ps2">2. Sections</div>
+      <div class="prog-step" id="ps3">3. Structure</div>
+      <div class="prog-step" id="ps4">4. Generate</div>
+    </div>
+  </div>
+</div>
+
+<div class="shell">
+
+<!-- STEP 1: RETAILER -->
+<div class="step active" id="s-retailer">
+  <div class="eyebrow">Step 1 of 4</div>
+  <div class="htitle">Retailer details</div>
+  <div class="hsub">Context that drives content across every slide</div>
+  <div class="card">
+    <div class="fl">
+      <div class="flbl">Retailer name</div>
+      <input type="text" id="r-name" placeholder="e.g. Waitrose, Kroger, Boots">
+    </div>
+    <div class="fl">
+      <div class="flbl">Geography</div>
+      <div class="pills" data-key="geo">
+        <div class="pill" data-val="UK">UK</div>
+        <div class="pill" data-val="US">US</div>
+        <div class="pill" data-val="Europe">Europe</div>
+        <div class="pill" data-val="South Africa">South Africa</div>
+        <div class="pill" data-val="Multi-region">Multi-region</div>
+      </div>
+    </div>
+    <div class="fl">
+      <div class="flbl">Sector</div>
+      <div class="pills" data-key="sector">
+        <div class="pill" data-val="grocery">Grocery</div>
+        <div class="pill" data-val="pharmacy">Pharmacy</div>
+        <div class="pill" data-val="fashion">Fashion / Apparel</div>
+        <div class="pill" data-val="petrol">Petrol / Forecourt</div>
+        <div class="pill" data-val="convenience">Convenience</div>
+        <div class="pill" data-val="diy">DIY / Home</div>
+        <div class="pill" data-val="gym">Gym / Leisure</div>
+        <div class="pill" data-val="electronics">Electronics</div>
+        <div class="pill" data-val="other">Other</div>
+      </div>
+    </div>
+    <div class="fl">
+      <div class="flbl">RFP type</div>
+      <div class="pills" data-key="rfptype">
+        <div class="pill" data-val="RFI Response">RFI — capability assessment</div>
+        <div class="pill" data-val="RFP Response">RFP — full proposal</div>
+        <div class="pill" data-val="POC Proposal">POC / pilot proposal</div>
+        <div class="pill" data-val="Capability Overview">Capability overview</div>
+      </div>
+    </div>
+    <div class="fl">
+      <div class="flbl">Estimated store estate</div>
+      <div class="pills" data-key="storeband">
+        <div class="pill" data-val="pilot">Pilot — 1 to 20 stores</div>
+        <div class="pill" data-val="regional">Regional — 21 to 100</div>
+        <div class="pill" data-val="national">National — 101 to 500</div>
+        <div class="pill" data-val="enterprise">Enterprise — 500+</div>
+      </div>
+    </div>
+    <div class="fl">
+      <div class="flbl">Deployment timeline</div>
+      <div class="pills" data-key="timeline">
+        <div class="pill" data-val="poc3">POC in 3 months</div>
+        <div class="pill" data-val="phase6">Phase 1 in 6 months</div>
+        <div class="pill" data-val="rollout12">Full rollout in 12 months</div>
+        <div class="pill" data-val="multiyear">Multi-year programme</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav"><span></span><button class="btn btnp" id="btn-to-sections">Next: Sections →</button></div>
+</div>
+
+<!-- STEP 2: SECTIONS -->
+<div class="step" id="s-sections">
+  <div class="eyebrow">Step 2 of 4</div>
+  <div class="htitle">Select sections</div>
+  <div class="hsub">Each section has a fixed layout. Toggle to include or exclude.</div>
+  <div class="sec-grid" id="sec-grid"></div>
+  <div class="nav">
+    <button class="btn" id="btn-back1">← Back</button>
+    <button class="btn btnp" id="btn-to-structure">Next: Structure →</button>
+  </div>
+</div>
+
+<!-- STEP 3: STRUCTURE -->
+<div class="step" id="s-structure">
+  <div class="eyebrow">Step 3 of 4</div>
+  <div class="htitle">Deck structure</div>
+  <div class="hsub">Controls which sections appear and in what order</div>
+  <div class="card">
+    <div class="structure-card on" id="str-exec" onclick="selectStructure('exec')">
+      <div class="sc-radio"><div class="sc-dot"></div></div>
+      <div>
+        <div class="sc-title">Executive — cover, agenda, all sections, close</div>
+        <div class="sc-desc">Standard full RFP response structure</div>
+        <div class="sc-count" id="str-exec-count"></div>
+      </div>
+    </div>
+    <div class="structure-card" id="str-short" onclick="selectStructure('short')">
+      <div class="sc-radio"><div class="sc-dot"></div></div>
+      <div>
+        <div class="sc-title">Short pitch — cover, 4 highlights, close</div>
+        <div class="sc-desc">First 4 selected sections only — fast intro deck</div>
+        <div class="sc-count">6 slides</div>
+      </div>
+    </div>
+    <div class="structure-card" id="str-full" onclick="selectStructure('full')">
+      <div class="sc-radio"><div class="sc-dot"></div></div>
+      <div>
+        <div class="sc-title">Full proposal — cover, agenda, all sections, commercial, appendix, close</div>
+        <div class="sc-desc">Maximum depth — all selected sections plus appendix</div>
+        <div class="sc-count" id="str-full-count"></div>
+      </div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="btn" id="btn-back2">← Back</button>
+    <button class="btn btnp" id="btn-to-generate">Generate deck →</button>
+  </div>
+</div>
+
+<!-- STEP 4: GENERATE -->
+<div class="step" id="s-generate">
+  <div class="eyebrow">Step 4 of 4</div>
+  <div class="htitle">Generating your deck</div>
+  <div class="hsub">Config sent to Claude — your deck will appear in chat momentarily</div>
+  <div class="info-box">
+    Config has been sent. <strong>Check the chat</strong> — Claude is building the deck server-side and will present the download link.
+  </div>
+  <div class="config-display" id="config-display"></div>
+  <div class="nav">
+    <button class="btn" id="btn-restart">← Start over</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+var P = {name:'', geo:'', sector:'', rfptype:'', storeband:'', timeline:''};
+var selectedStructure = 'exec';
+
+var SECTIONS = [
+  {id:'company',      label:'Company overview',     layout:'Two-column narrative',    layoutCode:'narrative'},
+  {id:'platform',     label:'Platform & CMS',        layout:'Steps + spec table',      layoutCode:'steps'},
+  {id:'hardware',     label:'Hardware',              layout:'Steps + spec table',      layoutCode:'steps'},
+  {id:'measurement',  label:'Measurement',           layout:'Stat boxes + detail',     layoutCode:'stats'},
+  {id:'security',     label:'Security & compliance', layout:'Two-column narrative',    layoutCode:'narrative'},
+  {id:'installation', label:'Installation',          layout:'Steps + spec table',      layoutCode:'steps'},
+  {id:'support',      label:'Support & SLAs',        layout:'SLA table + footnotes',   layoutCode:'table'},
+  {id:'integrations', label:'Integrations & data',   layout:'Two-column narrative',    layoutCode:'narrative'},
+  {id:'financial',    label:'Financial stability',   layout:'Stat boxes + detail',     layoutCode:'stats'},
+  {id:'content',      label:'Content & creative',    layout:'Two-column narrative',    layoutCode:'narrative'},
+  {id:'scalability',  label:'Scalability',           layout:'Stat boxes + detail',     layoutCode:'stats'},
+  {id:'commercial',   label:'Commercial model',      layout:'Model cards + CPM table', layoutCode:'table'},
+];
+
+function wireframe(layoutCode, isSelected) {
+  var bg = isSelected ? 'rgba(0,124,133,0.15)' : 'rgba(255,255,255,0.04)';
+  var barCol = isSelected ? '#4ECDC4' : 'rgba(255,255,255,0.12)';
+  var lineCol = isSelected ? 'rgba(78,205,196,0.25)' : 'rgba(255,255,255,0.07)';
+  var blockCol = isSelected ? 'rgba(0,124,133,0.3)' : 'rgba(255,255,255,0.06)';
+  var titleCol = isSelected ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.1)';
+  var svg = '<svg width="100%" height="52" viewBox="0 0 160 52" xmlns="http://www.w3.org/2000/svg" style="display:block">';
+  svg += '<rect width="160" height="52" fill="' + bg + '"/>';
+  if (layoutCode === 'stats') {
+    for(var i=0;i<4;i++){
+      svg += '<rect x="' + (2+i*40) + '" y="3" width="36" height="14" rx="2" fill="' + blockCol + '"/>';
+      svg += '<rect x="' + (8+i*40) + '" y="7" width="18" height="4" rx="1" fill="' + barCol + '" opacity=".6"/>';
+    }
+    for(var j=0;j<3;j++){
+      svg += '<rect x="2" y="' + (22+j*8) + '" width="3" height="3" rx="1" fill="' + barCol + '" opacity=".5"/>';
+      svg += '<rect x="7" y="' + (23+j*8) + '" width="55" height="2" rx="1" fill="' + lineCol + '"/>';
+    }
+    for(var k=0;k<3;k++){
+      svg += '<rect x="85" y="' + (23+k*8) + '" width="28" height="2" rx="1" fill="' + lineCol + '"/>';
+      svg += '<rect x="118" y="' + (23+k*8) + '" width="38" height="2" rx="1" fill="' + titleCol + '"/>';
+    }
+    svg += '<line x1="80" y1="20" x2="80" y2="50" stroke="' + lineCol + '" stroke-width=".5"/>';
+  } else if (layoutCode === 'narrative') {
+    svg += '<rect x="2" y="3" width="2" height="10" rx="1" fill="' + barCol + '"/>';
+    svg += '<rect x="6" y="5" width="60" height="3" rx="1" fill="' + titleCol + '"/>';
+    svg += '<rect x="2" y="16" width="156" height=".5" fill="' + lineCol + '"/>';
+    for(var i=0;i<4;i++){
+      svg += '<rect x="2" y="' + (20+i*7) + '" width="3" height="3" rx="1" fill="' + barCol + '" opacity=".5"/>';
+      svg += '<rect x="7" y="' + (21+i*7) + '" width="60" height="2" rx="1" fill="' + lineCol + '"/>';
+    }
+    for(var j=0;j<4;j++){
+      svg += '<rect x="85" y="' + (21+j*7) + '" width="25" height="2" rx="1" fill="' + lineCol + '"/>';
+      svg += '<rect x="115" y="' + (21+j*7) + '" width="40" height="2" rx="1" fill="' + titleCol + '"/>';
+    }
+    svg += '<line x1="80" y1="17" x2="80" y2="50" stroke="' + lineCol + '" stroke-width=".5"/>';
+  } else if (layoutCode === 'steps') {
+    svg += '<rect x="2" y="3" width="2" height="10" rx="1" fill="' + barCol + '"/>';
+    svg += '<rect x="6" y="5" width="50" height="3" rx="1" fill="' + titleCol + '"/>';
+    svg += '<rect x="2" y="16" width="156" height=".5" fill="' + lineCol + '"/>';
+    for(var i=0;i<4;i++){
+      svg += '<rect x="2" y="' + (20+i*7) + '" width="5" height="5" rx="1" fill="' + blockCol + '"/>';
+      svg += '<rect x="10" y="' + (21+i*7) + '" width="55" height="2" rx="1" fill="' + lineCol + '"/>';
+    }
+    for(var j=0;j<4;j++){
+      svg += '<rect x="85" y="' + (21+j*7) + '" width="25" height="2" rx="1" fill="' + lineCol + '"/>';
+      svg += '<rect x="115" y="' + (21+j*7) + '" width="40" height="2" rx="1" fill="' + titleCol + '"/>';
+    }
+    svg += '<line x1="80" y1="17" x2="80" y2="50" stroke="' + lineCol + '" stroke-width=".5"/>';
+  } else if (layoutCode === 'table') {
+    svg += '<rect x="2" y="3" width="2" height="10" rx="1" fill="' + barCol + '"/>';
+    svg += '<rect x="6" y="5" width="50" height="3" rx="1" fill="' + titleCol + '"/>';
+    svg += '<rect x="2" y="16" width="156" height=".5" fill="' + lineCol + '"/>';
+    svg += '<rect x="2" y="20" width="156" height="6" rx="1" fill="' + blockCol + '"/>';
+    for(var i=0;i<3;i++){
+      var rowBg = i%2===0 ? 'rgba(255,255,255,0.03)' : 'transparent';
+      svg += '<rect x="2" y="' + (28+i*7) + '" width="156" height="6" rx="0" fill="' + rowBg + '"/>';
+      svg += '<rect x="4" y="' + (30+i*7) + '" width="30" height="2" rx="1" fill="' + barCol + '" opacity=".4"/>';
+      svg += '<rect x="40" y="' + (30+i*7) + '" width="50" height="2" rx="1" fill="' + lineCol + '"/>';
+      svg += '<rect x="100" y="' + (30+i*7) + '" width="30" height="2" rx="1" fill="' + lineCol + '"/>';
+      svg += '<rect x="140" y="' + (30+i*7) + '" width="16" height="2" rx="1" fill="' + lineCol + '"/>';
+    }
+  }
+  svg += '</svg>';
+  return svg;
+}
+
+var grid = document.getElementById('sec-grid');
+SECTIONS.forEach(function(sec) {
+  var card = document.createElement('div');
+  card.className = 'sec-card on';
+  card.dataset.id = sec.id;
+  card.innerHTML =
+    '<div class="sec-card-name">' + sec.label + '</div>' +
+    '<div class="sec-card-layout">' + sec.layout + '</div>' +
+    '<div class="preview-wire" id="wire-' + sec.id + '">' + wireframe(sec.layoutCode, true) + '</div>' +
+    '<div class="check">✓</div>';
+  card.addEventListener('click', function() {
+    var isOn = card.classList.toggle('on');
+    document.getElementById('wire-' + sec.id).innerHTML = wireframe(sec.layoutCode, isOn);
+    card.querySelector('.check').textContent = isOn ? '✓' : '';
+    updateCounts();
+  });
+  grid.appendChild(card);
+});
+
+function getSelectedSections() {
+  return SECTIONS.filter(function(s) {
+    return document.querySelector('.sec-card[data-id="'+s.id+'"]').classList.contains('on');
+  }).map(function(s){return s.id;});
+}
+
+function updateCounts() {
+  var n = getSelectedSections().length;
+  document.getElementById('str-exec-count').textContent = (n + 3) + ' slides';
+  document.getElementById('str-full-count').textContent = (n + 5) + ' slides';
+}
+updateCounts();
+
+document.querySelectorAll('.pills[data-key]').forEach(function(group) {
+  group.querySelectorAll('.pill[data-val]').forEach(function(pill) {
+    pill.addEventListener('click', function() {
+      group.querySelectorAll('.pill[data-val]').forEach(function(p){p.classList.remove('on');});
+      pill.classList.add('on');
+      P[group.dataset.key] = pill.dataset.val;
+    });
+  });
+});
+document.getElementById('r-name').addEventListener('input', function(){P.name = this.value;});
+
+function selectStructure(id) {
+  ['exec','short','full'].forEach(function(s){document.getElementById('str-'+s).classList.remove('on');});
+  document.getElementById('str-'+id).classList.add('on');
+  selectedStructure = id;
+}
+
+document.getElementById('btn-to-sections').addEventListener('click', function(){show('sections');});
+document.getElementById('btn-back1').addEventListener('click', function(){show('retailer');});
+document.getElementById('btn-to-structure').addEventListener('click', function(){updateCounts();show('structure');});
+document.getElementById('btn-back2').addEventListener('click', function(){show('sections');});
+document.getElementById('btn-to-generate').addEventListener('click', function(){show('generate');fireGenerate();});
+document.getElementById('btn-restart').addEventListener('click', function(){show('retailer');});
+
+function show(name) {
+  document.querySelectorAll('.step').forEach(function(s){s.classList.remove('active');});
+  document.getElementById('s-'+name).classList.add('active');
+  var steps = {retailer:1, sections:2, structure:3, generate:4};
+  var n = steps[name];
+  document.getElementById('prog').style.width = (n*25)+'%';
+  ['ps1','ps2','ps3','ps4'].forEach(function(id,i){
+    var el = document.getElementById(id);
+    el.className = 'prog-step' + (i+1 < n ? ' done' : i+1 === n ? ' act' : '');
+  });
+  window.scrollTo(0,0);
+}
+
+function fireGenerate() {
+  var secs = getSelectedSections();
+  var config = {
+    name:      P.name      || 'Retailer',
+    geo:       P.geo       || 'UK',
+    sector:    P.sector    || 'grocery',
+    rfptype:   P.rfptype   || 'RFP Response',
+    storeband: P.storeband || 'national',
+    timeline:  P.timeline  || 'rollout12',
+    sections:  secs,
+    structure: selectedStructure,
+  };
+  document.getElementById('config-display').textContent = JSON.stringify(config, null, 2);
+  var msg = 'Please generate this RFP deck now:\n```json\n' + JSON.stringify(config, null, 2) + '\n```';
+  setTimeout(function(){ sendPrompt(msg); }, 400);
+}
+</script>
+</body>
+</html>
