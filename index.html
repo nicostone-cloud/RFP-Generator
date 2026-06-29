@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Barrows Connected Store — RFP Deck Generator</title>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0A0A14;color:#fff;min-height:100vh}
@@ -26,11 +27,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .hsub{font-size:14px;color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:1.75rem}
 .card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:1.25rem;margin-bottom:12px}
 .fl{margin-bottom:22px}.fl:last-child{margin-bottom:0}
-.flbl{font-size:12px;font-weight:600;color:#fff;margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em}
-.fhint{font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:8px;line-height:1.5}
+.flbl{font-size:12px;font-weight:600;color:#fff;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
 input[type=text]{width:100%;padding:10px 13px;font-size:14px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:rgba(255,255,255,0.05);color:#fff;outline:none;font-family:inherit;transition:border .15s}
 input[type=text]::placeholder{color:rgba(255,255,255,0.2)}
-input[type=text]:focus{border-color:#007C85;box-shadow:0 0 0 3px rgba(3,70,47,0.2)}
+input[type=text]:focus{border-color:#007C85;box-shadow:0 0 0 3px rgba(0,124,133,0.2)}
 .pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:5px}
 .pill{padding:6px 13px;border:1px solid rgba(255,255,255,0.1);border-radius:20px;font-size:12px;color:rgba(255,255,255,0.5);cursor:pointer;background:transparent;transition:all .12s;user-select:none}
 .pill:hover{border-color:rgba(78,205,196,0.4);color:#4ECDC4;background:rgba(78,205,196,0.06)}
@@ -47,7 +47,7 @@ input[type=text]:focus{border-color:#007C85;box-shadow:0 0 0 3px rgba(3,70,47,0.
 .sec-card-name{font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);margin-bottom:3px}
 .sec-card-layout{font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:8px}
 .sec-card.on .sec-card-name{color:#4ECDC4}
-.preview-wire{width:100%;height:52px;border-radius:4px;overflow:hidden;position:relative;background:rgba(255,255,255,0.04)}
+.preview-wire{width:100%;height:52px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,0.04)}
 .check{position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:10px}
 .sec-card.on .check{background:#4ECDC4;border-color:#4ECDC4;color:#007C85}
 .structure-card{border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .14s;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
@@ -60,9 +60,15 @@ input[type=text]:focus{border-color:#007C85;box-shadow:0 0 0 3px rgba(3,70,47,0.
 .sc-title{font-size:13px;font-weight:600;color:#fff;margin-bottom:2px}
 .sc-desc{font-size:12px;color:rgba(255,255,255,0.38);line-height:1.5}
 .sc-count{font-size:11px;color:#4ECDC4;margin-top:3px}
-.config-display{padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);font-size:11px;color:rgba(255,255,255,0.45);margin-top:1rem;white-space:pre}
-.info-box{padding:12px 14px;border-radius:8px;background:rgba(78,205,196,0.07);border:1px solid rgba(78,205,196,0.15);font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:14px}
+.info-box{padding:14px 16px;border-radius:8px;background:rgba(78,205,196,0.07);border:1px solid rgba(78,205,196,0.2);font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;margin-bottom:16px}
 .info-box strong{color:#4ECDC4}
+.gen-btn{width:100%;padding:14px;font-size:15px;font-weight:600;border-radius:10px;background:#007C85;border:none;color:#4ECDC4;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px}
+.gen-btn:hover{background:#005f66}
+.gen-btn:disabled{opacity:.5;cursor:not-allowed}
+.spinner{width:18px;height:18px;border:2px solid rgba(78,205,196,0.3);border-top-color:#4ECDC4;border-radius:50%;animation:spin .7s linear infinite;display:none}
+.gen-btn.loading .spinner{display:block}
+.gen-btn.loading .btn-label{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -91,7 +97,7 @@ input[type=text]:focus{border-color:#007C85;box-shadow:0 0 0 3px rgba(3,70,47,0.
 
 <div class="shell">
 
-<!-- STEP 1: RETAILER -->
+<!-- STEP 1 -->
 <div class="step active" id="s-retailer">
   <div class="eyebrow">Step 1 of 4</div>
   <div class="htitle">Retailer details</div>
@@ -156,7 +162,7 @@ input[type=text]:focus{border-color:#007C85;box-shadow:0 0 0 3px rgba(3,70,47,0.
   <div class="nav"><span></span><button class="btn btnp" id="btn-to-sections">Next: Sections →</button></div>
 </div>
 
-<!-- STEP 2: SECTIONS -->
+<!-- STEP 2 -->
 <div class="step" id="s-sections">
   <div class="eyebrow">Step 2 of 4</div>
   <div class="htitle">Select sections</div>
@@ -168,7 +174,7 @@ input[type=text]:focus{border-color:#007C85;box-shadow:0 0 0 3px rgba(3,70,47,0.
   </div>
 </div>
 
-<!-- STEP 3: STRUCTURE -->
+<!-- STEP 3 -->
 <div class="step" id="s-structure">
   <div class="eyebrow">Step 3 of 4</div>
   <div class="htitle">Deck structure</div>
@@ -193,203 +199,247 @@ input[type=text]:focus{border-color:#007C85;box-shadow:0 0 0 3px rgba(3,70,47,0.
     <div class="structure-card" id="str-full" onclick="selectStructure('full')">
       <div class="sc-radio"><div class="sc-dot"></div></div>
       <div>
-        <div class="sc-title">Full proposal — cover, agenda, all sections, commercial, appendix, close</div>
-        <div class="sc-desc">Maximum depth — all selected sections plus appendix</div>
+        <div class="sc-title">Full proposal — cover, agenda, all sections, references, close</div>
+        <div class="sc-desc">Maximum depth — all selected sections</div>
         <div class="sc-count" id="str-full-count"></div>
       </div>
     </div>
   </div>
   <div class="nav">
     <button class="btn" id="btn-back2">← Back</button>
-    <button class="btn btnp" id="btn-to-generate">Generate deck →</button>
+    <button class="btn btnp" id="btn-to-generate">Next: Generate →</button>
   </div>
 </div>
 
-<!-- STEP 4: GENERATE -->
+<!-- STEP 4 -->
 <div class="step" id="s-generate">
   <div class="eyebrow">Step 4 of 4</div>
-  <div class="htitle">Generating your deck</div>
-  <div class="hsub">Config sent to Claude — your deck will appear in chat momentarily</div>
-  <div class="info-box">
-    Config has been sent. <strong>Check the chat</strong> — Claude is building the deck server-side and will present the download link.
-  </div>
-  <div class="config-display" id="config-display"></div>
-  <div class="nav">
-    <button class="btn" id="btn-restart">← Start over</button>
+  <div class="htitle">Generate deck</div>
+  <div class="hsub">Builds and downloads your .pptx directly in the browser — no server needed</div>
+  <div class="info-box" id="gen-summary"></div>
+  <button class="gen-btn" id="gen-btn" onclick="generateDeck()">
+    <div class="spinner"></div>
+    <span class="btn-label">⬇ Download deck</span>
+  </button>
+  <div class="nav" style="margin-top:1.5rem">
+    <button class="btn" id="btn-back3">← Back</button>
+    <button class="btn" id="btn-restart">Start over</button>
   </div>
 </div>
 
-</div>
+</div><!-- /shell -->
 
 <script>
-var P = {name:'', geo:'', sector:'', rfptype:'', storeband:'', timeline:''};
+// ── STATE ─────────────────────────────────────────────────────────────────────
+var P = {name:'',geo:'UK',sector:'grocery',rfptype:'RFP Response',storeband:'national',timeline:'rollout12'};
 var selectedStructure = 'exec';
 
 var SECTIONS = [
-  {id:'company',      label:'Company overview',     layout:'Two-column narrative',    layoutCode:'narrative'},
-  {id:'platform',     label:'Platform & CMS',        layout:'Steps + spec table',      layoutCode:'steps'},
-  {id:'hardware',     label:'Hardware',              layout:'Steps + spec table',      layoutCode:'steps'},
-  {id:'measurement',  label:'Measurement',           layout:'Stat boxes + detail',     layoutCode:'stats'},
-  {id:'security',     label:'Security & compliance', layout:'Two-column narrative',    layoutCode:'narrative'},
-  {id:'installation', label:'Installation',          layout:'Steps + spec table',      layoutCode:'steps'},
-  {id:'support',      label:'Support & SLAs',        layout:'SLA table + footnotes',   layoutCode:'table'},
-  {id:'integrations', label:'Integrations & data',   layout:'Two-column narrative',    layoutCode:'narrative'},
-  {id:'financial',    label:'Financial stability',   layout:'Stat boxes + detail',     layoutCode:'stats'},
-  {id:'content',      label:'Content & creative',    layout:'Two-column narrative',    layoutCode:'narrative'},
-  {id:'scalability',  label:'Scalability',           layout:'Stat boxes + detail',     layoutCode:'stats'},
-  {id:'commercial',   label:'Commercial model',      layout:'Model cards + CPM table', layoutCode:'table'},
+  {id:'company',      label:'Company overview',     layout:'Two-column narrative',    lc:'narrative'},
+  {id:'platform',     label:'Platform & CMS',        layout:'Steps + spec table',      lc:'steps'},
+  {id:'hardware',     label:'Hardware',              layout:'Steps + spec table',      lc:'steps'},
+  {id:'measurement',  label:'Measurement',           layout:'Stat boxes + detail',     lc:'stats'},
+  {id:'security',     label:'Security & compliance', layout:'Two-column narrative',    lc:'narrative'},
+  {id:'installation', label:'Installation',          layout:'Steps + spec table',      lc:'steps'},
+  {id:'support',      label:'Support & SLAs',        layout:'SLA table + footnotes',   lc:'table'},
+  {id:'integrations', label:'Integrations & data',   layout:'Two-column narrative',    lc:'narrative'},
+  {id:'financial',    label:'Financial stability',   layout:'Stat boxes + detail',     lc:'stats'},
+  {id:'content',      label:'Content & creative',    layout:'Two-column narrative',    lc:'narrative'},
+  {id:'scalability',  label:'Scalability',           layout:'Stat boxes + detail',     lc:'stats'},
+  {id:'commercial',   label:'Commercial model',      layout:'Model cards + CPM table', lc:'table'},
 ];
 
-function wireframe(layoutCode, isSelected) {
-  var bg = isSelected ? 'rgba(0,124,133,0.15)' : 'rgba(255,255,255,0.04)';
-  var barCol = isSelected ? '#4ECDC4' : 'rgba(255,255,255,0.12)';
-  var lineCol = isSelected ? 'rgba(78,205,196,0.25)' : 'rgba(255,255,255,0.07)';
-  var blockCol = isSelected ? 'rgba(0,124,133,0.3)' : 'rgba(255,255,255,0.06)';
-  var titleCol = isSelected ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.1)';
-  var svg = '<svg width="100%" height="52" viewBox="0 0 160 52" xmlns="http://www.w3.org/2000/svg" style="display:block">';
-  svg += '<rect width="160" height="52" fill="' + bg + '"/>';
-  if (layoutCode === 'stats') {
-    for(var i=0;i<4;i++){
-      svg += '<rect x="' + (2+i*40) + '" y="3" width="36" height="14" rx="2" fill="' + blockCol + '"/>';
-      svg += '<rect x="' + (8+i*40) + '" y="7" width="18" height="4" rx="1" fill="' + barCol + '" opacity=".6"/>';
-    }
-    for(var j=0;j<3;j++){
-      svg += '<rect x="2" y="' + (22+j*8) + '" width="3" height="3" rx="1" fill="' + barCol + '" opacity=".5"/>';
-      svg += '<rect x="7" y="' + (23+j*8) + '" width="55" height="2" rx="1" fill="' + lineCol + '"/>';
-    }
-    for(var k=0;k<3;k++){
-      svg += '<rect x="85" y="' + (23+k*8) + '" width="28" height="2" rx="1" fill="' + lineCol + '"/>';
-      svg += '<rect x="118" y="' + (23+k*8) + '" width="38" height="2" rx="1" fill="' + titleCol + '"/>';
-    }
-    svg += '<line x1="80" y1="20" x2="80" y2="50" stroke="' + lineCol + '" stroke-width=".5"/>';
-  } else if (layoutCode === 'narrative') {
-    svg += '<rect x="2" y="3" width="2" height="10" rx="1" fill="' + barCol + '"/>';
-    svg += '<rect x="6" y="5" width="60" height="3" rx="1" fill="' + titleCol + '"/>';
-    svg += '<rect x="2" y="16" width="156" height=".5" fill="' + lineCol + '"/>';
-    for(var i=0;i<4;i++){
-      svg += '<rect x="2" y="' + (20+i*7) + '" width="3" height="3" rx="1" fill="' + barCol + '" opacity=".5"/>';
-      svg += '<rect x="7" y="' + (21+i*7) + '" width="60" height="2" rx="1" fill="' + lineCol + '"/>';
-    }
-    for(var j=0;j<4;j++){
-      svg += '<rect x="85" y="' + (21+j*7) + '" width="25" height="2" rx="1" fill="' + lineCol + '"/>';
-      svg += '<rect x="115" y="' + (21+j*7) + '" width="40" height="2" rx="1" fill="' + titleCol + '"/>';
-    }
-    svg += '<line x1="80" y1="17" x2="80" y2="50" stroke="' + lineCol + '" stroke-width=".5"/>';
-  } else if (layoutCode === 'steps') {
-    svg += '<rect x="2" y="3" width="2" height="10" rx="1" fill="' + barCol + '"/>';
-    svg += '<rect x="6" y="5" width="50" height="3" rx="1" fill="' + titleCol + '"/>';
-    svg += '<rect x="2" y="16" width="156" height=".5" fill="' + lineCol + '"/>';
-    for(var i=0;i<4;i++){
-      svg += '<rect x="2" y="' + (20+i*7) + '" width="5" height="5" rx="1" fill="' + blockCol + '"/>';
-      svg += '<rect x="10" y="' + (21+i*7) + '" width="55" height="2" rx="1" fill="' + lineCol + '"/>';
-    }
-    for(var j=0;j<4;j++){
-      svg += '<rect x="85" y="' + (21+j*7) + '" width="25" height="2" rx="1" fill="' + lineCol + '"/>';
-      svg += '<rect x="115" y="' + (21+j*7) + '" width="40" height="2" rx="1" fill="' + titleCol + '"/>';
-    }
-    svg += '<line x1="80" y1="17" x2="80" y2="50" stroke="' + lineCol + '" stroke-width=".5"/>';
-  } else if (layoutCode === 'table') {
-    svg += '<rect x="2" y="3" width="2" height="10" rx="1" fill="' + barCol + '"/>';
-    svg += '<rect x="6" y="5" width="50" height="3" rx="1" fill="' + titleCol + '"/>';
-    svg += '<rect x="2" y="16" width="156" height=".5" fill="' + lineCol + '"/>';
-    svg += '<rect x="2" y="20" width="156" height="6" rx="1" fill="' + blockCol + '"/>';
-    for(var i=0;i<3;i++){
-      var rowBg = i%2===0 ? 'rgba(255,255,255,0.03)' : 'transparent';
-      svg += '<rect x="2" y="' + (28+i*7) + '" width="156" height="6" rx="0" fill="' + rowBg + '"/>';
-      svg += '<rect x="4" y="' + (30+i*7) + '" width="30" height="2" rx="1" fill="' + barCol + '" opacity=".4"/>';
-      svg += '<rect x="40" y="' + (30+i*7) + '" width="50" height="2" rx="1" fill="' + lineCol + '"/>';
-      svg += '<rect x="100" y="' + (30+i*7) + '" width="30" height="2" rx="1" fill="' + lineCol + '"/>';
-      svg += '<rect x="140" y="' + (30+i*7) + '" width="16" height="2" rx="1" fill="' + lineCol + '"/>';
-    }
+// ── WIREFRAMES ────────────────────────────────────────────────────────────────
+function wireframe(lc, on) {
+  var bg=on?'rgba(0,124,133,0.15)':'rgba(255,255,255,0.04)';
+  var bar=on?'#4ECDC4':'rgba(255,255,255,0.12)';
+  var line=on?'rgba(78,205,196,0.25)':'rgba(255,255,255,0.07)';
+  var blk=on?'rgba(0,124,133,0.3)':'rgba(255,255,255,0.06)';
+  var ttl=on?'rgba(78,205,196,0.5)':'rgba(255,255,255,0.1)';
+  var s='<svg width="100%" height="52" viewBox="0 0 160 52" xmlns="http://www.w3.org/2000/svg">';
+  s+='<rect width="160" height="52" fill="'+bg+'"/>';
+  if(lc==='stats'){
+    for(var i=0;i<4;i++){s+='<rect x="'+(2+i*40)+'" y="3" width="36" height="14" rx="2" fill="'+blk+'"/><rect x="'+(8+i*40)+'" y="7" width="18" height="4" rx="1" fill="'+bar+'" opacity=".6"/>';}
+    for(var j=0;j<3;j++){s+='<rect x="2" y="'+(22+j*8)+'" width="3" height="3" rx="1" fill="'+bar+'" opacity=".5"/><rect x="7" y="'+(23+j*8)+'" width="55" height="2" rx="1" fill="'+line+'"/><rect x="85" y="'+(23+j*8)+'" width="28" height="2" rx="1" fill="'+line+'"/><rect x="118" y="'+(23+j*8)+'" width="38" height="2" rx="1" fill="'+ttl+'"/>';}
+    s+='<line x1="80" y1="20" x2="80" y2="50" stroke="'+line+'" stroke-width=".5"/>';
+  } else if(lc==='narrative'||lc==='steps'){
+    var nb=lc==='steps';
+    s+='<rect x="2" y="3" width="2" height="10" rx="1" fill="'+bar+'"/><rect x="6" y="5" width="60" height="3" rx="1" fill="'+ttl+'"/><rect x="2" y="16" width="156" height=".5" fill="'+line+'"/>';
+    for(var i=0;i<4;i++){if(nb)s+='<rect x="2" y="'+(20+i*7)+'" width="5" height="5" rx="1" fill="'+blk+'"/>';else s+='<rect x="2" y="'+(20+i*7)+'" width="3" height="3" rx="1" fill="'+bar+'" opacity=".5"/>';s+='<rect x="'+(nb?10:7)+'" y="'+(21+i*7)+'" width="55" height="2" rx="1" fill="'+line+'"/><rect x="85" y="'+(21+i*7)+'" width="25" height="2" rx="1" fill="'+line+'"/><rect x="115" y="'+(21+i*7)+'" width="40" height="2" rx="1" fill="'+ttl+'"/>';}
+    s+='<line x1="80" y1="17" x2="80" y2="50" stroke="'+line+'" stroke-width=".5"/>';
+  } else if(lc==='table'){
+    s+='<rect x="2" y="3" width="2" height="10" rx="1" fill="'+bar+'"/><rect x="6" y="5" width="50" height="3" rx="1" fill="'+ttl+'"/><rect x="2" y="16" width="156" height=".5" fill="'+line+'"/><rect x="2" y="20" width="156" height="6" rx="1" fill="'+blk+'"/>';
+    for(var i=0;i<3;i++){var rb=i%2===0?'rgba(255,255,255,0.03)':'transparent';s+='<rect x="2" y="'+(28+i*7)+'" width="156" height="6" fill="'+rb+'"/><rect x="4" y="'+(30+i*7)+'" width="30" height="2" rx="1" fill="'+bar+'" opacity=".4"/><rect x="40" y="'+(30+i*7)+'" width="50" height="2" rx="1" fill="'+line+'"/><rect x="100" y="'+(30+i*7)+'" width="30" height="2" rx="1" fill="'+line+'"/><rect x="140" y="'+(30+i*7)+'" width="16" height="2" rx="1" fill="'+line+'"/>';}
   }
-  svg += '</svg>';
-  return svg;
+  return s+'</svg>';
 }
 
+// ── BUILD SECTION GRID ────────────────────────────────────────────────────────
 var grid = document.getElementById('sec-grid');
-SECTIONS.forEach(function(sec) {
-  var card = document.createElement('div');
-  card.className = 'sec-card on';
-  card.dataset.id = sec.id;
-  card.innerHTML =
-    '<div class="sec-card-name">' + sec.label + '</div>' +
-    '<div class="sec-card-layout">' + sec.layout + '</div>' +
-    '<div class="preview-wire" id="wire-' + sec.id + '">' + wireframe(sec.layoutCode, true) + '</div>' +
-    '<div class="check">✓</div>';
-  card.addEventListener('click', function() {
-    var isOn = card.classList.toggle('on');
-    document.getElementById('wire-' + sec.id).innerHTML = wireframe(sec.layoutCode, isOn);
-    card.querySelector('.check').textContent = isOn ? '✓' : '';
+SECTIONS.forEach(function(sec){
+  var card=document.createElement('div');
+  card.className='sec-card on'; card.dataset.id=sec.id;
+  card.innerHTML='<div class="sec-card-name">'+sec.label+'</div><div class="sec-card-layout">'+sec.layout+'</div><div class="preview-wire" id="wire-'+sec.id+'">'+wireframe(sec.lc,true)+'</div><div class="check">✓</div>';
+  card.addEventListener('click',function(){
+    var on=card.classList.toggle('on');
+    document.getElementById('wire-'+sec.id).innerHTML=wireframe(sec.lc,on);
+    card.querySelector('.check').textContent=on?'✓':'';
     updateCounts();
   });
   grid.appendChild(card);
 });
 
-function getSelectedSections() {
-  return SECTIONS.filter(function(s) {
-    return document.querySelector('.sec-card[data-id="'+s.id+'"]').classList.contains('on');
-  }).map(function(s){return s.id;});
-}
-
-function updateCounts() {
-  var n = getSelectedSections().length;
-  document.getElementById('str-exec-count').textContent = (n + 3) + ' slides';
-  document.getElementById('str-full-count').textContent = (n + 5) + ' slides';
-}
+function getSecs(){return SECTIONS.filter(function(s){return document.querySelector('.sec-card[data-id="'+s.id+'"]').classList.contains('on');}).map(function(s){return s.id;});}
+function updateCounts(){var n=getSecs().length;document.getElementById('str-exec-count').textContent=(n+3)+' slides';document.getElementById('str-full-count').textContent=(n+4)+' slides';}
 updateCounts();
 
-document.querySelectorAll('.pills[data-key]').forEach(function(group) {
-  group.querySelectorAll('.pill[data-val]').forEach(function(pill) {
-    pill.addEventListener('click', function() {
-      group.querySelectorAll('.pill[data-val]').forEach(function(p){p.classList.remove('on');});
-      pill.classList.add('on');
-      P[group.dataset.key] = pill.dataset.val;
-    });
+// ── PILLS ─────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.pills[data-key]').forEach(function(g){
+  g.querySelectorAll('.pill[data-val]').forEach(function(p){
+    p.addEventListener('click',function(){g.querySelectorAll('.pill').forEach(function(x){x.classList.remove('on');});p.classList.add('on');P[g.dataset.key]=p.dataset.val;});
   });
 });
-document.getElementById('r-name').addEventListener('input', function(){P.name = this.value;});
+document.getElementById('r-name').addEventListener('input',function(){P.name=this.value;});
 
-function selectStructure(id) {
-  ['exec','short','full'].forEach(function(s){document.getElementById('str-'+s).classList.remove('on');});
-  document.getElementById('str-'+id).classList.add('on');
-  selectedStructure = id;
+function selectStructure(id){['exec','short','full'].forEach(function(s){document.getElementById('str-'+s).classList.remove('on');});document.getElementById('str-'+id).classList.add('on');selectedStructure=id;}
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+document.getElementById('btn-to-sections').addEventListener('click',function(){show('sections');});
+document.getElementById('btn-back1').addEventListener('click',function(){show('retailer');});
+document.getElementById('btn-to-structure').addEventListener('click',function(){updateCounts();show('structure');});
+document.getElementById('btn-back2').addEventListener('click',function(){show('sections');});
+document.getElementById('btn-to-generate').addEventListener('click',function(){buildSummary();show('generate');});
+document.getElementById('btn-back3').addEventListener('click',function(){show('structure');});
+document.getElementById('btn-restart').addEventListener('click',function(){show('retailer');});
+
+function buildSummary(){
+  var secs=getSecs();
+  var n=selectedStructure==='short'?Math.min(4,secs.length):secs.length;
+  var slides=n+(selectedStructure==='short'?2:selectedStructure==='exec'?3:4);
+  document.getElementById('gen-summary').innerHTML='<strong>'+( P.name||'Retailer')+'</strong> · '+(P.geo||'UK')+' · '+(P.sector||'grocery')+' · '+(P.rfptype||'RFP Response')+'<br>'+selectedStructure+' structure · '+slides+' slides · downloads as .pptx';
 }
 
-document.getElementById('btn-to-sections').addEventListener('click', function(){show('sections');});
-document.getElementById('btn-back1').addEventListener('click', function(){show('retailer');});
-document.getElementById('btn-to-structure').addEventListener('click', function(){updateCounts();show('structure');});
-document.getElementById('btn-back2').addEventListener('click', function(){show('sections');});
-document.getElementById('btn-to-generate').addEventListener('click', function(){show('generate');fireGenerate();});
-document.getElementById('btn-restart').addEventListener('click', function(){show('retailer');});
-
-function show(name) {
+function show(name){
   document.querySelectorAll('.step').forEach(function(s){s.classList.remove('active');});
   document.getElementById('s-'+name).classList.add('active');
-  var steps = {retailer:1, sections:2, structure:3, generate:4};
-  var n = steps[name];
-  document.getElementById('prog').style.width = (n*25)+'%';
-  ['ps1','ps2','ps3','ps4'].forEach(function(id,i){
-    var el = document.getElementById(id);
-    el.className = 'prog-step' + (i+1 < n ? ' done' : i+1 === n ? ' act' : '');
-  });
+  var steps={retailer:1,sections:2,structure:3,generate:4};
+  var n=steps[name];
+  document.getElementById('prog').style.width=(n*25)+'%';
+  ['ps1','ps2','ps3','ps4'].forEach(function(id,i){var el=document.getElementById(id);el.className='prog-step'+(i+1<n?' done':i+1===n?' act':'');});
   window.scrollTo(0,0);
 }
 
-function fireGenerate() {
-  var secs = getSelectedSections();
-  var config = {
-    name:      P.name      || 'Retailer',
-    geo:       P.geo       || 'UK',
-    sector:    P.sector    || 'grocery',
-    rfptype:   P.rfptype   || 'RFP Response',
-    storeband: P.storeband || 'national',
-    timeline:  P.timeline  || 'rollout12',
-    sections:  secs,
-    structure: selectedStructure,
+// ── BRAND CONSTANTS ───────────────────────────────────────────────────────────
+var BLACK='0A0A14',WHITE='FFFFFF',TEAL='007C85',TEAL2='4ECDC4',GREY='E5E7EB',MID='6B7280',BODY='374151',CARD='F9FAFB',FH='Arial',FB='Arial';
+var COVER_BG='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';
+
+// ── GENERATE ──────────────────────────────────────────────────────────────────
+function generateDeck(){
+  var btn=document.getElementById('gen-btn');
+  btn.classList.add('loading'); btn.disabled=true;
+
+  var name=P.name||'Retailer', geo=P.geo||'UK', sector=P.sector||'grocery';
+  var rfptype=P.rfptype||'RFP Response', storeband=P.storeband||'national', timeline=P.timeline||'rollout12';
+  var sections=getSecs(), structure=selectedStructure;
+
+  var isUK=geo==='UK'||geo==='Europe', isUS=geo==='US', isSA=geo==='South Africa';
+  var isPOC=rfptype==='POC Proposal';
+
+  var REFS_MAP={
+    grocery: isUK?[['Tesco / Dunnhumby','2,400+ screens · 547+ stores · UK'],['Waitrose / JLP','Premium grocery · UK · 2025 programme'],['Kroger / 84.51','Multi-state grocery · US'],['Walgreens','Nationwide pharmacy · US'],['DisChem','Health & beauty · South Africa']]:
+      isSA?[['DisChem','Health & beauty · South Africa · lead deployment'],['Tesco / Dunnhumby','2,400+ screens · 547+ stores · UK'],['Waitrose / JLP','Premium grocery · UK'],['Kroger / 84.51','Multi-state grocery · US'],['Walgreens','Nationwide pharmacy · US']]:
+      [['Kroger / 84.51','Multi-state grocery · US · iROAS validated'],['Walgreens','Nationwide pharmacy · US'],['Tesco / Dunnhumby','2,400+ screens · 547+ stores · UK'],['Waitrose / JLP','Premium grocery · UK'],['DisChem','Health & beauty · South Africa']],
+    pharmacy:[['Walgreens','Nationwide US pharmacy · 8,900+ stores'],['DisChem','Health & beauty · South Africa'],['Tesco / Dunnhumby','2,400+ screens · UK grocery'],['Kroger / 84.51','US grocery · pharmacy integration'],['Waitrose / JLP','Premium UK grocery']],
+    fashion:[['Tesco / Dunnhumby','2,400+ screens · UK · fashion-adjacent'],['Waitrose / JLP','Premium UK retail · lifestyle content'],['Kroger / 84.51','US multi-format · lifestyle media'],['DisChem','Health & beauty · South Africa'],['Walgreens','US pharmacy · personal care']],
   };
-  document.getElementById('config-display').textContent = JSON.stringify(config, null, 2);
-  var msg = 'Please generate this RFP deck now:\n```json\n' + JSON.stringify(config, null, 2) + '\n```';
-  setTimeout(function(){ sendPrompt(msg); }, 400);
+  var refs=REFS_MAP[sector]||[['Tesco / Dunnhumby','2,400+ screens · 547+ stores · UK'],['Kroger / 84.51','Multi-state · US'],['Walgreens','Nationwide pharmacy · US'],['Waitrose / JLP','Premium grocery · UK'],['DisChem','Health & beauty · South Africa']];
+
+  var CPM=isUK?{std:'£8–12 CPM',prem:'£12–20 CPM',util:'40–55%',share:'22–25%',cur:'UK'}:isSA?{std:'R18–28 CPM',prem:'R28–45 CPM',util:'35–50%',share:'20–25%',cur:'SA'}:{std:'$8–14 CPM',prem:'$12–20 CPM',util:'40–55%',share:'22–25%',cur:'US'};
+  var STORES={pilot:{count:'1–20',screens:'20–200',rate:'3–5 stores/wk',framing:'Pilot network'},regional:{count:'21–100',screens:'200–1,000',rate:'5–15 stores/wk',framing:'Regional rollout'},national:{count:'101–500',screens:'1,000–5,000',rate:'15–40 stores/wk',framing:'National programme'},enterprise:{count:'500+',screens:'5,000+',rate:'40+ stores/wk',framing:'Enterprise-scale deployment'}};
+  var ST=STORES[storeband]||STORES.national;
+  var TL={poc3:'POC delivery in 3 months from sign-off',phase6:'Phase 1 live within 6 months from contract',rollout12:'Full network live within 12 months',multiyear:'Phased multi-year programme'}[timeline]||'Timeline to be agreed';
+
+  setTimeout(function(){
+    try {
+      var pres=new PptxGenJS();
+      pres.layout='LAYOUT_WIDE';
+
+      function abar(s){s.addShape(pres.ShapeType.rect,{x:0,y:0,w:0.08,h:7.5,fill:{color:TEAL},line:{color:TEAL,width:0}});}
+      function hdr(s,t,sub){abar(s);s.addText(t,{x:0.22,y:0.3,w:12.8,h:0.58,fontSize:24,color:BLACK,bold:true,fontFace:FH});s.addShape(pres.ShapeType.rect,{x:0.22,y:0.95,w:12.8,h:0.025,fill:{color:GREY},line:{color:GREY,width:0}});if(sub)s.addText(sub,{x:0.22,y:1.02,w:12.8,h:0.3,fontSize:12,color:MID,fontFace:FB});}
+      function secLbl(s,t,x,y,w){s.addText(t.toUpperCase(),{x:x,y:y,w:w,h:0.22,fontSize:9,color:TEAL,bold:true,fontFace:FB,charSpacing:1.5});}
+      function bul(s,t,x,y,w){s.addShape(pres.ShapeType.rect,{x:x,y:y+0.15,w:0.05,h:0.05,fill:{color:TEAL2},line:{color:TEAL2,width:0}});s.addText(t,{x:x+0.12,y:y,w:w-0.12,h:0.44,fontSize:12,color:BODY,fontFace:FB,valign:'middle'});}
+      function drow(s,lbl,val,x,y,w,hl){s.addText(lbl,{x:x,y:y,w:w*0.46,h:0.38,fontSize:11,color:MID,fontFace:FB});s.addText(val,{x:x+w*0.46,y:y,w:w*0.54,h:0.38,fontSize:12,color:hl?TEAL:BLACK,bold:true,fontFace:FH});}
+      function vdiv(s,x){s.addShape(pres.ShapeType.rect,{x:x,y:1.38,w:0.015,h:5.85,fill:{color:GREY},line:{color:GREY,width:0}});}
+      function sbox(s,num,lbl,x,y,w){s.addShape(pres.ShapeType.rect,{x:x,y:y,w:w,h:1.1,fill:{color:BLACK},line:{color:BLACK,width:0}});s.addShape(pres.ShapeType.rect,{x:x,y:y+1.08,w:w,h:0.025,fill:{color:TEAL},line:{color:TEAL,width:0}});s.addText(num,{x:x+0.08,y:y+0.05,w:w-0.16,h:0.65,fontSize:30,color:TEAL2,bold:true,fontFace:FH,align:'center'});s.addText(lbl,{x:x+0.08,y:y+0.7,w:w-0.16,h:0.34,fontSize:10,color:'AAAAAA',fontFace:FB,align:'center'});}
+      function thdr(s,hdrs,cx,cw,y){hdrs.forEach(function(h,i){s.addShape(pres.ShapeType.rect,{x:cx[i],y:y,w:cw[i],h:0.35,fill:{color:TEAL},line:{color:TEAL,width:0}});s.addText(h,{x:cx[i]+0.08,y:y,w:cw[i]-0.1,h:0.35,fontSize:10,color:WHITE,bold:true,fontFace:FH,valign:'middle'});});}
+      function trow(s,cells,cx,cw,y,ri,hl){var rb=ri%2===0?CARD:WHITE;cells.forEach(function(cell,i){s.addShape(pres.ShapeType.rect,{x:cx[i],y:y,w:cw[i],h:0.42,fill:{color:rb},line:{color:GREY,width:0}});var isH=hl&&hl[i];s.addText(cell,{x:cx[i]+0.08,y:y,w:cw[i]-0.1,h:0.42,fontSize:11,color:isH?TEAL:BODY,bold:isH,fontFace:isH?FH:FB,valign:'middle'});});}
+      function steprow(s,num,text,x,y,w){s.addShape(pres.ShapeType.rect,{x:x,y:y+0.05,w:0.25,h:0.25,fill:{color:TEAL},line:{color:TEAL,width:0}});s.addText(String(num),{x:x,y:y+0.05,w:0.25,h:0.25,fontSize:10,color:WHITE,bold:true,fontFace:FH,align:'center',valign:'middle'});s.addText(text,{x:x+0.32,y:y,w:w-0.32,h:0.38,fontSize:12,color:BODY,fontFace:FB,valign:'middle'});}
+
+      // SLIDE BUILDERS
+      function bCompany(){var s=pres.addSlide();s.background={color:WHITE};hdr(s,'Barrows Connected Store','Retail media technology — built exclusively for retail');vdiv(s,6.58);secLbl(s,'Who we are',0.22,1.42,6.2);['Retail media technology division of Barrows Global, a WPP company','Founded 1990 · US, UK, South Africa and Europe','Vertically integrated: design, engineering, manufacturing, platform and operations','Exclusively retail-focused — not adapted from generic digital signage','"Global gold standard for in-store retail media" — analyst Andrew Lipsman'].forEach(function(t,i){bul(s,t,0.22,1.74+i*0.49,6.2);});secLbl(s,'Proven at scale in '+geo,6.72,1.42,6.3);refs.slice(0,5).forEach(function(r,i){drow(s,r[0],r[1],6.72,1.74+i*0.52,6.3,i===0);});drow(s,'WPP parent revenue','4bn+ annually',6.72,1.74+5*0.52,6.3,false);}
+      function bPlatform(){var s=pres.addSlide();s.background={color:WHITE};hdr(s,'Connect OS Platform','Retail-first CMS — built for '+sector+' environments');vdiv(s,6.58);secLbl(s,'Platform architecture',0.22,1.42,6.2);[['Media player','Bespoke Android — in-house manufactured'],['Ad-server model','Dynamic playlisting — no manual playlist management'],['Uptime SLA','95%+ committed · 98%+ achieved across live networks'],['SSO / access','SAML 2.0 · OAuth 2.0 · RBAC · store-level overrides'],['Compatibility','BrightSign · X86 · SOC panels · hardware agnostic'],['Hosting','Cloud SaaS · AWS/GCP migration available']].forEach(function(r,i){drow(s,r[0],r[1],0.22,1.74+i*0.52,6.2);});secLbl(s,'Scheduling & content',6.72,1.42,6.3);[['Dayparting','Hour and day-of-week scheduling'],['Minute-parting','Exact minute-interval triggers'],['Real-time triggers','Inventory, pricing, sensor data'],['Content formats','HTML5 · MP4 · VAST/VPAID'],['Store overrides','Associate app for OOS blocking'],['Reporting','Intraday API — same-day visibility']].forEach(function(r,i){drow(s,r[0],r[1],6.72,1.74+i*0.52,6.3);});}
+      function bHardware(){var s=pres.addSlide();s.background={color:WHITE};hdr(s,'Hardware & Manufacturing','Bespoke in-house touchpoints — designed for '+sector);vdiv(s,6.58);secLbl(s,'Hardware specification',0.22,1.42,6.2);[['Display partners','Samsung commercial · Bluefin · 500nit+ · 24/7 rated'],['Screen sizes','7" to 98"+''],['Peripherals','BLE · anonymous video · Lift & Learn · proximity sensors'],['Media player','Bespoke Android · in-house · 4G/LTE + WiFi failover'],['Compatibility','BrightSign · X86 · SOC panels'],['Power','PoE options available · standard 13A spur']].forEach(function(r,i){drow(s,r[0],r[1],0.22,1.74+i*0.52,6.2);});secLbl(s,'Lead times & deployment',6.72,1.42,6.3);[['Design & prototyping','10 weeks from sign-off'],['Production (sea freight)','16 weeks — cost-optimised'],['Air freight option','Expedited — reduces lead time 6–8 weeks'],['Install rate (at scale)',ST.rate],[geo+' coverage',isUK?'Nationwide UK contractor network':isUS?'All 50 states · 2,200+ technicians':'Regional certified network'],['Programme timeline',TL]].forEach(function(r,i){drow(s,r[0],r[1],6.72,1.74+i*0.52,6.3);});}
+      function bMeasurement(){var s=pres.addSlide();s.background={color:WHITE};hdr(s,'Measurement & Analytics','Five-tier model — from proof of play to econometric iROAS');sbox(s,'5 Tiers','Measurement framework',0.22,1.38,2.5);sbox(s,'98%+','Uptime achieved',2.82,1.38,2.5);sbox(s,'iROAS','Sales uplift metric',5.42,1.38,2.5);sbox(s,'SKU','EPOS data granularity',8.02,1.38,2.5);sbox(s,'Intraday','Reporting cadence',10.62,1.38,2.5);secLbl(s,'Measurement tiers',0.22,2.68,6.2);['Tier 1: Proof of play — logged creative start, mid and end points','Tier 2: Impressions — WiFi sensors, POI data and store footfall','Tier 3: Dwell time and demographic profiling via anonymous video','Tier 4: Sales uplift — test vs control, validated at Kroger and Tesco','Tier 5: Full econometric modelling with iROAS output'].forEach(function(t,i){bul(s,t,0.22,3.0+i*0.49,6.2);});secLbl(s,'Data inputs — '+name,6.72,2.68,6.3);[['EPOS required','SKU-level · 12–24 months history preferred'],['Feed cadence','Weekly or monthly recurring'],['Sensor type','Passive WiFi · anonymous video camera'],['Privacy posture','Zero PII · Bloom-filter MAC pseudonymisation'],['Reporting delivery','API · Tableau · Datorama · custom feed']].forEach(function(r,i){drow(s,r[0],r[1],6.72,3.0+i*0.52,6.3);});}
+      function bSecurity(){var s=pres.addSlide();s.background={color:WHITE};hdr(s,'Security & Compliance','ISO 27001:2022 certified · zero PII retained');vdiv(s,6.58);secLbl(s,'Certifications & standards',0.22,1.42,6.2);[['ISMS','ISO/IEC 27001:2022 certified'],['SOC','SOC 1 and SOC 2 Type II attested'],['GRC platform','Continuous monitoring via Drata'],['Pen testing','Regular independent third-party assessments'],['Encryption (transit)','TLS 1.2+'],['Encryption (rest)','AES-256']].forEach(function(r,i){drow(s,r[0],r[1],0.22,1.74+i*0.52,6.2);});secLbl(s,'Data & IoT posture',6.72,1.42,6.3);[['PII stored','Zero — no personal data retained on any device'],['MAC anonymisation','Bloom filter — irreversible on storage'],['Video processing','On-device only — no raw video to cloud'],['GDPR / CCPA',isUK?'Full GDPR compliance warranted':isUS?'CCPA compliance warranted':'Warranted compliance across all jurisdictions'],['IoT patching','P1 expedited · standard monthly cadence'],['Incident response','4 severity levels with defined SLA targets']].forEach(function(r,i){drow(s,r[0],r[1],6.72,1.74+i*0.52,6.3);});}
+      function bInstallation(){var s=pres.addSlide();s.background={color:WHITE};hdr(s,'Installation & Deployment','Turnkey service — survey to handover · '+TL);vdiv(s,6.58);secLbl(s,'Deployment process',0.22,1.42,6.2);['Site survey — power, network, structural and fixture placement audit','Store readiness — electrical enabling works sequenced 1–2 weeks prior','Installation — overnight preferred, 3–4 nights per store','Commissioning — full connectivity, playback and Connect OS activation','Handover — completion report, snag resolution and associate briefing'].forEach(function(t,i){steprow(s,i+1,t,0.22,1.74+i*0.5,6.2);});secLbl(s,'Capacity — '+ST.framing,6.72,1.42,6.3);[['Estate size',ST.count+' stores'],['Estimated screens',ST.screens],['Install rate',ST.rate],[geo+' coverage',isUK?'Nationwide certified network':isUS?'All 50 states · 2,200+ technicians':'Regional certified contractors'],['Night install','Standard — minimises trading disruption'],['Programme timeline',TL]].forEach(function(r,i){drow(s,r[0],r[1],6.72,1.74+i*0.52,6.3);});}
+      function bSupport(){var s=pres.addSlide();s.background={color:WHITE};hdr(s,'Support & SLAs','24/7 automated monitoring · ~95% remote resolution');var cx=[0.22,2.07,4.47,8.07,11.0],cw=[1.8,2.35,3.55,2.88,2.25];thdr(s,['Priority','Description','Example','SLA Target','Resolution'],cx,cw,1.38);[['P1 Critical','Black screen / wrong content','Display offline or content failure','8 working hours','~95% remote'],['P2 Serious','Hardware functional, degraded','Sensor failure, connectivity loss','Same business day','~95% remote'],['P3 Moderate','Fault detected, UX unaffected','Minor telemetry anomaly','Next business day','Remote or field'],['P4 Informational','Non-urgent query or request','Feature question, reporting','3 business days','Remote']].forEach(function(row,ri){trow(s,row,cx,cw,1.38+0.35+ri*0.46,ri,[true]);});secLbl(s,'Infrastructure',0.22,4.2,6.2);['Connect OS monitors every unit multiple times daily — automated ticketing on fault detection','~95% of all issues resolved remotely without requiring a field visit','Full real-time ticket visibility for '+name+' team in Connect OS'].forEach(function(t,i){bul(s,t,0.22,4.52+i*0.49,6.2);});secLbl(s,'Uptime performance',6.72,4.2,6.3);[['SLA commitment','95%+ monthly across network'],['Actual performance','98%+ achieved consistently'],['Field dispatch','2–3 working days if on-site required']].forEach(function(r,i){drow(s,r[0],r[1],6.72,4.52+i*0.52,6.3);});}
+      function bIntegrations(){var s=pres.addSlide();s.background={color:WHITE};hdr(s,'Integrations & Data','REST API · programmatic · real-time triggers');vdiv(s,6.58);secLbl(s,'API capabilities',0.22,1.42,6.2);[['Campaign reporting','Impressions · dwell · SOV · play time'],['Data availability','Intraday — same-day visibility'],['Device health','Network status · telemetry · anomalies'],['Content triggers','Real-time inventory and pricing feeds'],['Loyalty / CRM','Audience targeting data ingestion'],['BI delivery','Tableau · Datorama · custom API endpoint']].forEach(function(r,i){drow(s,r[0],r[1],0.22,1.74+i*0.52,6.2);});secLbl(s,'Programmatic & procurement',6.72,1.42,6.3);[['Ad serving','VAST/VPAID for programmatic delivery'],['Self-serve DSP','Streaem partnership for DSP buyers'],['POS integration','Real-time content triggers from POS data'],[isUK?'UK procurement':'US procurement',isUK?'Standard UK procurement process':isUS?'Ariba · Coupa · Workday compatible':'Standard procurement process'],['Programmatic','SSP integration at network maturity'],['Recommendation','Direct-sold first, programmatic at scale']].forEach(function(r,i){drow(s,r[0],r[1],6.72,1.74+i*0.52,6.3);});}
+      function bFinancial(){var s=pres.addSlide();s.background={color:WHITE};hdr(s,'Financial Stability',"WPP plc — world's largest communications group");sbox(s,'WPP plc','LSE-listed parent',0.22,1.38,3.0);sbox(s,'4bn+','WPP annual revenue',3.32,1.38,3.0);sbox(s,'100+','Countries of operation',6.42,1.38,3.0);sbox(s,'15,000+','Screens globally',9.52,1.38,3.0);secLbl(s,'Financial backing',0.22,2.68,6.2);['BCS is a wholly-owned subsidiary of Barrows Global, owned by WPP plc (LSE listed)','Access to WPP capital for long-term programme commitments and hardware investment','All WPP financial reporting publicly disclosed — verifiable through LSE filings','BCS entity financials available through legal and finance channels on request'].forEach(function(t,i){bul(s,t,0.22,3.0+i*0.5,6.2);});secLbl(s,'Reference deployments — '+geo,6.72,2.68,6.3);refs.slice(0,5).forEach(function(r,i){drow(s,r[0],r[1],6.72,3.0+i*0.52,6.3,i===0);});}
+      function bContent(){var s=pres.addSlide();s.background={color:WHITE};hdr(s,'Content & Creative','Full managed content service — '+sector+' specialists');vdiv(s,6.58);secLbl(s,'Content operations',0.22,1.42,6.2);[['Standard turnaround','5 business days from brief'],['Urgent updates','24-hour notice available'],['Approval workflow','Brief → compliance → scheduling → proof of play'],['Audio','Silent video default · audio on retailer request'],['Content expiry','Auto-rollback to house content on expiry'],['Weekly reporting','Launch confirmation every change-over date']].forEach(function(r,i){drow(s,r[0],r[1],0.22,1.74+i*0.52,6.2);});secLbl(s,'Formats & scheduling',6.72,1.42,6.3);[['HTML5','Live variable rendering — price, inventory, promotions'],['MP4 video','In-video tokens for versioned creative'],['VAST/VPAID','Programmatic ad serving'],['Dayparting','Hour and day-of-week scheduling'],['Minute-parting','Exact minute-interval triggers'],['SOV model','Typically 70–80% paid / 20–30% retailer house']].forEach(function(r,i){drow(s,r[0],r[1],6.72,1.74+i*0.52,6.3);});}
+      function bScalability(){var s=pres.addSlide();s.background={color:WHITE};hdr(s,'Scalability','Proven at enterprise scale — '+ST.framing+' for '+name);sbox(s,'15,000+','Screens globally',0.22,1.38,3.0);sbox(s,ST.screens,'Est. screens — '+name,3.32,1.38,3.0);sbox(s,ST.rate,'Install capacity',6.42,1.38,3.0);sbox(s,'98%+','Uptime achieved',9.52,1.38,3.0);secLbl(s,'Architecture',0.22,2.68,6.2);['Cloud SaaS — Digital Ocean · AWS/GCP migration available','Distributed device model: each screen operates independently with cached content','CDN-delivered media for consistent performance at 10,000+ endpoints','Automated monitoring checks every unit multiple times daily','Horizontally scalable — no performance degradation at enterprise scale'].forEach(function(t,i){bul(s,t,0.22,3.0+i*0.5,6.2);});secLbl(s,'Scale references',6.72,2.68,6.3);refs.slice(0,5).forEach(function(r,i){drow(s,r[0],r[1],6.72,3.0+i*0.52,6.3,i===0);});}
+      function bCommercial(){var s=pres.addSlide();s.background={color:WHITE};hdr(s,'Commercial Model','Three structures — tailored to '+ST.framing.toLowerCase()+' stage');var models=[{title:'Capex + Managed Service',lines:['Retailer funds hardware capex','BCS charges platform fee + managed service','BCS media retained share: 22–25%','Lowest long-term cost · retailer owns assets']},{title:'Subscription / HaaS',lines:['BCS supplies and maintains all hardware','Per-screen per-month subscription fee','Eliminates upfront capex entirely','Predictable monthly OPEX — preferred for '+storeband]},{title:'Revenue Share',lines:['BCS absorbs hardware cost','Higher BCS media share in return','Zero retailer capex or OPEX risk',isPOC||storeband==='pilot'?'Recommended for pilot stage':'Best for early-stage networks']}];var bw=4.12;models.forEach(function(m,i){var bx=0.22+i*(bw+0.1);s.addShape(pres.ShapeType.rect,{x:bx,y:1.38,w:bw,h:0.38,fill:{color:TEAL},line:{color:TEAL,width:0}});s.addText(m.title,{x:bx+0.1,y:1.38,w:bw-0.2,h:0.38,fontSize:11,color:WHITE,bold:true,fontFace:FH,valign:'middle'});m.lines.forEach(function(line,li){bul(s,line,bx,1.82+li*0.44,bw);});});secLbl(s,'Indicative CPM benchmarks — '+CPM.cur,0.22,3.72,12.8);var cx=[0.22,5.32,7.82,9.82],cw=[5.0,2.4,1.9,3.5];thdr(s,['Zone','Standard CPM','Premium CPM','Note'],cx,cw,4.0);[[sector.charAt(0).toUpperCase()+sector.slice(1)+' standard zone',CPM.std,CPM.prem,'Pilot phase — '+ST.count+' stores'],['High-traffic / entrance / checkout',CPM.prem,CPM.prem+'+','Premium zone uplift'],['Network utilisation at maturity',CPM.util,CPM.util,'Of available inventory sold'],['BCS retained media share',CPM.share,CPM.share,'Varies by commercial model']].forEach(function(row,ri){trow(s,row,cx,cw,4.0+0.35+ri*0.44,ri,[false,true,true,false]);});}
+
+      var BUILDERS={company:bCompany,platform:bPlatform,hardware:bHardware,measurement:bMeasurement,security:bSecurity,installation:bInstallation,support:bSupport,integrations:bIntegrations,financial:bFinancial,content:bContent,scalability:bScalability,commercial:bCommercial};
+
+      // COVER
+      var cover=pres.addSlide();cover.background={color:BLACK};
+      cover.addImage({data:'data:image/png;base64,'+COVER_BG,x:0,y:0,w:13.3,h:7.5});
+      cover.addText('BARROWS',{x:1.2,y:0.6,w:5,h:0.35,fontSize:13,color:WHITE,bold:true,fontFace:FH,charSpacing:4});
+      cover.addText('Connected Store',{x:1.2,y:0.95,w:9,h:0.42,fontSize:18,color:'AAAAAA',fontFace:FB,charSpacing:1});
+      cover.addShape(pres.ShapeType.rect,{x:1.2,y:1.5,w:1.2,h:0.04,fill:{color:TEAL},line:{color:TEAL,width:0}});
+      cover.addText(rfptype,{x:1.2,y:1.7,w:10,h:1.0,fontSize:42,color:WHITE,bold:true,fontFace:FH});
+      cover.addText('Prepared for: '+name+(geo?' · '+geo:'')+(sector?' · '+sector.charAt(0).toUpperCase()+sector.slice(1):''),{x:1.2,y:2.82,w:10,h:0.32,fontSize:13,color:'BBBBBB',fontFace:FB});
+      cover.addText(ST.framing+' · '+TL.toLowerCase(),{x:1.2,y:3.18,w:10,h:0.28,fontSize:12,color:'888888',fontFace:FB});
+      cover.addText(new Date().toLocaleDateString('en-GB',{month:'long',year:'numeric'}).toUpperCase(),{x:1.2,y:6.6,w:5,h:0.26,fontSize:10,color:'666666',fontFace:FB,charSpacing:1});
+      cover.addShape(pres.ShapeType.rect,{x:0,y:7.2,w:13.3,h:0.3,fill:{color:TEAL},line:{color:TEAL,width:0}});
+      cover.addText('barrowscs.com',{x:0.2,y:7.2,w:5,h:0.3,fontSize:10,color:WHITE,fontFace:FB,valign:'middle'});
+      cover.addText('CONFIDENTIAL',{x:9.5,y:7.2,w:3.6,h:0.3,fontSize:10,color:WHITE,fontFace:FB,valign:'middle',align:'right',charSpacing:1});
+
+      // AGENDA
+      if(structure!=='short'){
+        var ag=pres.addSlide();ag.background={color:WHITE};abar(ag);
+        ag.addText('Agenda',{x:0.22,y:0.3,w:12,h:0.55,fontSize:24,color:BLACK,bold:true,fontFace:FH});
+        ag.addShape(pres.ShapeType.rect,{x:0.22,y:0.92,w:12.8,h:0.025,fill:{color:GREY},line:{color:GREY,width:0}});
+        var AT={company:'Company overview',platform:'Connect OS platform',hardware:'Hardware & manufacturing',measurement:'Measurement & analytics',security:'Security & compliance',installation:'Installation & deployment',support:'Support & SLAs',integrations:'Integrations & data',financial:'Financial stability',content:'Content & creative',scalability:'Scalability',commercial:'Commercial model'};
+        sections.forEach(function(sid,i){var y=1.18+i*0.48;ag.addText(String(i+1).padStart(2,'0'),{x:0.22,y:y,w:0.42,h:0.38,fontSize:14,color:TEAL,bold:true,fontFace:FH});ag.addText(AT[sid]||sid,{x:0.72,y:y,w:5.5,h:0.38,fontSize:13,color:BODY,fontFace:FB,valign:'middle'});});
+      }
+
+      // CONTENT SLIDES
+      var disp=structure==='short'?sections.slice(0,4):sections;
+      disp.forEach(function(sid){if(BUILDERS[sid])BUILDERS[sid]();});
+
+      // REFERENCES
+      var rs=pres.addSlide();rs.background={color:WHITE};hdr(rs,'Client References','Proven deployment experience in '+sector+' and beyond');
+      refs.forEach(function(r,i){var ry=1.42+i*0.57;rs.addText(r[0],{x:0.22,y:ry,w:3.9,h:0.3,fontSize:12,color:BLACK,bold:true,fontFace:FH});rs.addText(r[1],{x:4.2,y:ry,w:9,h:0.3,fontSize:12,color:BODY,fontFace:FB});rs.addShape(pres.ShapeType.rect,{x:0.22,y:ry+0.36,w:12.9,h:0.012,fill:{color:GREY},line:{color:GREY,width:0}});});
+
+      // CLOSING
+      var cl=pres.addSlide();cl.background={color:BLACK};
+      cl.addImage({data:'data:image/png;base64,'+COVER_BG,x:0,y:0,w:13.3,h:7.5});
+      cl.addShape(pres.ShapeType.rect,{x:0,y:7.2,w:13.3,h:0.3,fill:{color:TEAL},line:{color:TEAL,width:0}});
+      cl.addText("Let's build something",{x:1.2,y:1.8,w:10,h:0.8,fontSize:40,color:WHITE,bold:true,fontFace:FH});
+      cl.addText('exceptional together.',{x:1.2,y:2.62,w:10,h:0.8,fontSize:40,color:TEAL2,bold:true,fontFace:FH});
+      cl.addText('barrowscs.com  ·  hello@barrowscs.com',{x:1.2,y:3.65,w:10,h:0.35,fontSize:14,color:'888888',fontFace:FB});
+      cl.addText('barrowscs.com',{x:0.2,y:7.2,w:5,h:0.3,fontSize:10,color:WHITE,fontFace:FB,valign:'middle'});
+      cl.addText('CONFIDENTIAL',{x:9.5,y:7.2,w:3.6,h:0.3,fontSize:10,color:WHITE,fontFace:FB,valign:'middle',align:'right',charSpacing:1});
+
+      // DOWNLOAD
+      var fname='BCS_RFP_'+name.replace(/\s+/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.pptx';
+      pres.writeFile({fileName:fname}).then(function(){
+        btn.classList.remove('loading'); btn.disabled=false;
+      }).catch(function(e){alert('Error generating deck: '+e.message);btn.classList.remove('loading');btn.disabled=false;});
+
+    } catch(e){alert('Error: '+e.message);btn.classList.remove('loading');btn.disabled=false;}
+  }, 100);
 }
 </script>
 </body>
